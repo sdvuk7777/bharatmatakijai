@@ -24,10 +24,49 @@ import re
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from base64 import b64decode
+from urllib.parse import urlparse
 
 # Same AES Key aur IV jo encryption ke liye use kiya tha
 KEY = b'^#^#&@*HDU@&@*()'   
 IV = b'^@%#&*NSHUE&$*#)'   
+
+# MPD to M3U8 Conversion Function
+def convert_mpd_to_m3u8(mpd_url, quality="720"):
+    """
+    Convert master.mpd URL to m3u8 content and URL
+    """
+    try:
+        parsed_url = urlparse(mpd_url)
+        base_url = parsed_url.scheme + "://" + parsed_url.netloc
+        path_parts = parsed_url.path.split("/")
+        video_id = path_parts[1] if len(path_parts) > 1 else "video"
+        query_string = parsed_url.query
+        
+        # Construct m3u8 URL
+        m3u8_url = f"{base_url}/{video_id}/hls/{quality}/main.m3u8?{query_string}"
+        
+        # Download m3u8 content
+        response = requests.get(m3u8_url)
+        if response.status_code != 200:
+            raise Exception(f"Failed to download m3u8 file: {response.status_code}")
+        
+        content = response.text
+
+        # Replace EXT-X-KEY URI
+        new_key_uri = f"{base_url}/{video_id}/hls/enc.key?{query_string}"
+        content = re.sub(r'URI=".*?"', f'URI="{new_key_uri}"', content)
+
+        # Replace TS chunk paths
+        def replace_ts(match):
+            ts_file = match.group(1)
+            return f"{base_url}/{video_id}/hls/{quality}/{ts_file}?{query_string}"
+
+        content = re.sub(r'(\d+\.ts)', replace_ts, content)
+        
+        return content, m3u8_url
+        
+    except Exception as e:
+        raise Exception(f"MPD to M3U8 conversion failed: {str(e)}")
 
 # Decryption function
 def dec_url(enc_url):
@@ -64,7 +103,7 @@ def decrypt_file_txt(input_file):
                 out.write(line.strip() + "\n")  # Agar encrypted URL nahi mila to line jaisa hai waisa likho
 
     return output_file   # Decrypted file ka naam return karega
-   
+
 def duration(filename):   
     result = subprocess.run(["ffprobe", "-v", "error", "-show_entries",   
                              "format=duration", "-of",   
@@ -72,14 +111,14 @@ def duration(filename):
         stdout=subprocess.PIPE,   
         stderr=subprocess.STDOUT)   
     return float(result.stdout)
-   
+
 def get_mps_and_keys(api_url):
     response = requests.get(api_url)
     response_json = response.json()
     mpd = response_json.get('MPD')
     keys = response_json.get('KEYS')
     return mpd, keys
-   
+
 def exec(cmd):   
         process = subprocess.run(cmd, stdout=subprocess.PIPE,stderr=subprocess.PIPE)   
         output = process.stdout.decode()   
@@ -99,8 +138,8 @@ async def aio(url,name):
                 await f.write(await resp.read())   
                 await f.close()   
     return k   
-   
-   
+
+
 async def download(url,name):   
     ka = f'{name}.pdf'   
     async with aiohttp.ClientSession() as session:   
@@ -110,7 +149,7 @@ async def download(url,name):
                 await f.write(await resp.read())   
                 await f.close()   
     return ka   
-   
+
 async def pdf_download(url, file_name, chunk_size=1024 * 10):
     if os.path.exists(file_name):
         os.remove(file_name)
@@ -120,7 +159,7 @@ async def pdf_download(url, file_name, chunk_size=1024 * 10):
             if chunk:
                 fd.write(chunk)
     return file_name   
-   
+
 def parse_vid_info(info):   
     info = info.strip()   
     info = info.split("\n")   
@@ -140,8 +179,8 @@ def parse_vid_info(info):
             except:   
                 pass   
     return new_info   
-   
-   
+
+
 def vid_info(info):   
     info = info.strip()   
     info = info.split("\n")   
@@ -157,18 +196,18 @@ def vid_info(info):
             try:   
                 if "RESOLUTION" not in i[2] and i[2] not in temp and "audio" not in i[2]:   
                     temp.append(i[2])   
-                       
+
                     # temp.update(f'{i[2]}')   
                     # new_info.append((i[2], i[0]))   
                     #  mp4,mkv etc ==== f"({i[1]})"    
-                       
+
                     new_info.update({f'{i[2]}':f'{i[0]}'})   
-   
+
             except:   
                 pass   
     return new_info   
-   
-   
+
+
 async def decrypt_and_merge_video(mpd_url, keys_string, output_path, output_name, quality="720"):
     try:
         output_path = Path(output_path)
@@ -177,7 +216,7 @@ async def decrypt_and_merge_video(mpd_url, keys_string, output_path, output_name
         cmd1 = f'yt-dlp -f "bv[height<={quality}]+ba/b" -o "{output_path}/file.%(ext)s" --allow-unplayable-format --no-check-certificate --external-downloader aria2c "{mpd_url}"'
         print(f"Running command: {cmd1}")
         os.system(cmd1)
-        
+
         avDir = list(output_path.iterdir())
         print(f"Downloaded files: {avDir}")
         print("Decrypting")
@@ -211,7 +250,7 @@ async def decrypt_and_merge_video(mpd_url, keys_string, output_path, output_name
             (output_path / "video.mp4").unlink()
         if (output_path / "audio.m4a").exists():
             (output_path / "audio.m4a").unlink()
-        
+
         filename = output_path / f"{output_name}.mp4"
 
         if not filename.exists():
@@ -226,15 +265,15 @@ async def decrypt_and_merge_video(mpd_url, keys_string, output_path, output_name
     except Exception as e:
         print(f"Error during decryption and merging: {str(e)}")
         raise
-       
+
 async def run(cmd):   
     proc = await asyncio.create_subprocess_shell(   
         cmd,   
         stdout=asyncio.subprocess.PIPE,   
         stderr=asyncio.subprocess.PIPE)   
-   
+
     stdout, stderr = await proc.communicate()   
-   
+
     print(f'[{cmd!r} exited with {proc.returncode}]')   
     if proc.returncode == 1:   
         return False   
@@ -242,10 +281,10 @@ async def run(cmd):
         return f'[stdout]\n{stdout.decode()}'   
     if stderr:   
         return f'[stderr]\n{stderr.decode()}'   
-   
-       
-       
-       
+
+
+
+
 def old_download(url, file_name, chunk_size = 1024 * 10):   
     if os.path.exists(file_name):   
         os.remove(file_name)   
@@ -255,22 +294,22 @@ def old_download(url, file_name, chunk_size = 1024 * 10):
             if chunk:   
                 fd.write(chunk)   
     return file_name   
-   
-   
+
+
 def human_readable_size(size, decimal_places=2):   
     for unit in ['B', 'KB', 'MB', 'GB', 'TB', 'PB']:   
         if size < 1024.0 or unit == 'PB':   
             break   
         size /= 1024.0   
     return f"{size:.{decimal_places}f} {unit}"   
-   
-   
+
+
 def time_name():   
     date = datetime.date.today()   
     now = datetime.datetime.now()   
     current_time = now.strftime("%H%M%S")   
     return f"{date} {current_time}.mp4"   
-   
+
 async def download_video(url,cmd, name):   
     download_cmd = f'{cmd} -R 25 --fragment-retries 25 --external-downloader aria2c --downloader-args "aria2c: -x 16 -j 32" --cookies cookies.txt'   
     global failed_counter   
@@ -294,11 +333,11 @@ async def download_video(url,cmd, name):
             return f"{name}.mp4"   
         elif os.path.isfile(f"{name}.mp4.webm"):   
             return f"{name}.mp4.webm"   
-   
+
         return name   
     except FileNotFoundError as exc:   
         return os.path.isfile.splitext[0] + "." + "mp4"   
-   
+
 async def send_doc(bot: Client, m: Message,cc,ka,cc1,prog,count,name):   
     reply = await m.reply_text(f"Uploading - `{name}`")   
     time.sleep(1)   
@@ -323,7 +362,7 @@ def decrypt_file(file_path, key):
 
 async def download_and_decrypt_video(url, cmd, name, key):  
     video_path = await download_video(url, cmd, name)  
-    
+
     if video_path:  
         decrypted = decrypt_file(video_path, key)  
         if decrypted:  
@@ -341,7 +380,7 @@ async def download_and_decrypt_pdf(url, name, key):
     except subprocess.CalledProcessError as e:  
         print(f"Error during download: {e}")  
         return False  
-    
+
     file_path = f"{name}.pdf"  
     if not os.path.exists(file_path):  
         print(f"The file {file_path} does not exist.")  
@@ -360,7 +399,7 @@ async def download_and_decrypt_pdf(url, name, key):
         print(f"Error during decryption: {e}")  
         return False
 
-   
+
 
 #-----------------------Emoji handler------------------------------------
 
@@ -375,7 +414,7 @@ def get_next_emoji():
 
 
 async def send_vid(bot: Client, m: Message,cc,filename,thumb,name,prog):   
-       
+
     emoji = get_next_emoji()
     subprocess.run(f'ffmpeg -i "{filename}" -ss 00:00:02 -vframes 1 "{filename}.jpg"', shell=True)   
     await prog.delete (True)   
@@ -387,18 +426,18 @@ async def send_vid(bot: Client, m: Message,cc,filename,thumb,name,prog):
             thumbnail = thumb   
     except Exception as e:   
         await m.reply_text(str(e))   
-   
+
     dur = int(duration(filename))
     processing_msg = await m.reply_text(emoji) 
-   
+
     start_time = time.time()   
-   
+
     try:   
         await m.reply_video(filename,caption=cc, supports_streaming=True,height=720,width=1280,thumb=thumbnail,duration=dur, progress=progress_bar,progress_args=(reply,start_time))   
     except Exception:   
         await m.reply_document(filename,caption=cc, progress=progress_bar,progress_args=(reply,start_time))   
     os.remove(filename)   
-   
+
     os.remove(f"{filename}.jpg")
     await processing_msg.delete(True)
     await reply.delete (True) 
@@ -455,5 +494,3 @@ async def watermark_pdf(file_path, watermark_text):
     os.remove(file_path)
 
     return new_file_path
-       
-   
