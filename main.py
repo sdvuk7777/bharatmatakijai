@@ -1,5 +1,3 @@
-[file name]: main.py
-[file content begin]
 from pyrogram.errors.exceptions.bad_request_400 import StickerEmojiInvalid 
 import requests
 import m3u8
