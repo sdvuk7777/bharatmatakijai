@@ -75,7 +75,7 @@ async def account_login(bot: Client, m: Message):
 SUBSCRIPTION_FILE = "subscription_data.txt"
 
 # Admin ID
-YOUR_ADMIN_ID = 6005627579
+YOUR_ADMIN_ID = 6877021488
 
 # Function to read subscription data
 def read_subscription_data():
