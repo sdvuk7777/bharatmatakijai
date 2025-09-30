@@ -41,8 +41,8 @@ owner_id = [6877021488]
 auth_users = [6877021488]
 photo1 = 'https://envs.sh/PQ_.jpg'
 getstatusoutput(f"wget {photo1} -O 'photo.jpg'")    
-photo = "photo.jpg"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
-
+photo = "photo.jpg"                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+ 
 api_url = "http://master-api-v3.vercel.app/"
 api_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzkxOTMzNDE5NSIsInRnX3VzZXJuYW1lIjoi4p61IFtvZmZsaW5lXSIsImlhdCI6MTczODY5MjA3N30.SXzZ1MZcvMp5sGESj0hBKSghhxJ3k1GTWoBUbivUe1I"
 token_cp ='eyJjb3Vyc2VJZCI6IjQ1NjY4NyIsInR1dG9ySWQiOm51bGwsIm9yZ2lkIjo0ODA2MTksImNhdGVnb3J5SWQiOm51bGx9r'
@@ -741,6 +741,13 @@ async def start_download_process(bot, m, extracted_file, user_id):
         token = input11.text
         await input11.delete(True)
 
+        # NEW: Ask for HLS conversion preference
+        await m.reply_text("**Enable HLS conversion for MPD? (yes/no)**\n\n- **yes**: Convert MPD to M3U8 (faster download)\n- **no**: Use DRM decryption (requires key)")
+        input_hls: Message = await bot.listen(m.chat.id)
+        hls_preference = input_hls.text.lower()
+        await input_hls.delete(True)
+        enable_hls = hls_preference in ['yes', 'y', '1', 'true']
+
         await m.reply_text("Enter Your Tumbnail Link or use `no` for default")
         input6 = message = await bot.listen(m.chat.id)
         raw_text6 = input6.text
@@ -758,14 +765,14 @@ async def start_download_process(bot, m, extracted_file, user_id):
         else:
             count = int(raw_text)
 
-        # Start downloading links
-        await process_links_download(bot, m, links, count, b_name, res, MR, token, thumb, user_id, extracted_file)
+        # Start downloading links with HLS preference
+        await process_links_download(bot, m, links, count, b_name, res, MR, token, thumb, user_id, extracted_file, enable_hls)
         
     except Exception as e:
         await m.reply_text(f"❌ Error starting download process: {str(e)}")
 
-async def process_links_download(bot, m, links, count, b_name, res, MR, token, thumb, user_id, extracted_file):
-    """Process the links for download"""
+async def process_links_download(bot, m, links, count, b_name, res, MR, token, thumb, user_id, extracted_file, enable_hls=False):
+    """Process the links for download with HLS preference"""
     try:
         for i in range(count - 1, len(links)):
             if not links[i] or len(links[i]) < 2:
@@ -785,25 +792,6 @@ async def process_links_download(bot, m, links, count, b_name, res, MR, token, t
                     async with session.get(url, headers={'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9', 'Accept-Language': 'en-US,en;q=0.9', 'Cache-Control': 'no-cache', 'Connection': 'keep-alive', 'Pragma': 'no-cache', 'Referer': 'http://www.visionias.in/', 'Sec-Fetch-Dest': 'iframe', 'Sec-Fetch-Mode': 'navigate', 'Sec-Fetch-Site': 'cross-site', 'Upgrade-Insecure-Requests': '1', 'User-Agent': 'Mozilla/5.0 (Linux; Android 12; RMX2121) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Mobile Safari/537.36', 'sec-ch-ua': '"Chromium";v="107", "Not=A?Brand";v="24"', 'sec-ch-ua-mobile': '?1', 'sec-ch-ua-platform': '"Android"',}) as resp:
                             text = await resp.text()
                             url = re.search(r"(https://.*?playlist.m3u8.*?)\"", text).group(1)
-            
-            # NEW: Handle master.mpd URLs with vid.py logic
-            elif 'master.mpd' in url:
-                try:
-                    await m.reply_text("🔄 Converting MPD to M3U8...")
-                    m3u8_content, m3u8_url = helper.convert_mpd_to_m3u8(url, raw_text2)
-                    
-                    # Temporary m3u8 file create karo
-                    m3u8_filename = f"{name}_converted.m3u8"
-                    with open(m3u8_filename, 'w') as f:
-                        f.write(m3u8_content)
-                    
-                    # URL ko m3u8 file se replace karo
-                    url = m3u8_filename
-                    await m.reply_text("✅ MPD successfully converted to M3U8")
-                    
-                except Exception as e:
-                    await m.reply_text(f"❌ MPD conversion failed: {str(e)}")
-                    continue
             
             elif "https://cpvod.testbook.com/" in url:
                 url = url.replace("https://cpvod.testbook.com/","https://media-cdn.classplusapp.com/drm/")
@@ -861,8 +849,83 @@ async def process_links_download(bot, m, links, count, b_name, res, MR, token, t
                 if url.split("/")[3] != "demo":
                     url = f'https://videotest.adda247.com/demo/{url.split("https://videotest.adda247.com/")[1]}'
 
+            # NEW: Handle master.mpd URLs with HLS preference
             elif 'master.mpd' in url:
-              url =  f"{api_url}pw-dl?url={url}&token={token}&authorization={api_token}&q={raw_text2}"
+                if enable_hls:
+                    # Convert MPD to M3U8 (HLS ON)
+                    try:
+                        await m.reply_text("🔄 Converting MPD to M3U8...")
+                        m3u8_content, m3u8_url = helper.convert_mpd_to_m3u8(url, raw_text2)
+                        
+                        # Temporary m3u8 file create karo
+                        m3u8_filename = f"{name}_converted.m3u8"
+                        with open(m3u8_filename, 'w') as f:
+                            f.write(m3u8_content)
+                        
+                        # URL ko m3u8 file se replace karo
+                        url = m3u8_filename
+                        await m.reply_text("✅ MPD successfully converted to M3U8")
+                        
+                    except Exception as e:
+                        await m.reply_text(f"❌ MPD to M3U8 conversion failed: {str(e)}")
+                        continue
+                else:
+                    # Use DRM decryption with KID:KEY extraction (HLS OFF)
+                    try:
+                        await m.reply_text("🔐 Extracting DRM keys for ClearKey decryption...")
+                        
+                        # Extract KID:KEY using the API
+                        key_api_url = "https://studyable.io/studyrays/bot-development/key.php"
+                        post_data = {"video_url": url}
+                        
+                        response = requests.post(
+                            key_api_url, 
+                            data=post_data, 
+                            headers={"Content-Type": "application/x-www-form-urlencoded"}
+                        )
+                        
+                        if response.status_code == 200:
+                            key_data = response.json()
+                            if key_data.get("success"):
+                                kid_key_pair = key_data["data"][0]  # Format: "KID:KEY"
+                                await m.reply_text(f"✅ DRM keys extracted: `{kid_key_pair}`")
+                                
+                                # Parse KID and KEY
+                                kid, key = kid_key_pair.split(":")
+                                
+                                # Use Classplus-style DRM download with extracted keys
+                                keys_string = f"--key {kid}:{key}"
+                                
+                                # Set up for DRM download
+                                mpd = url
+                                path = f"./downloads/{m.chat.id}"
+                                
+                                # Use your existing DRM download function
+                                Show = f"🔐 DRM Decryption Progress\n\n📈 Total Links: {len(links)}\n💥 Currently On: {str(count).zfill(3)}\n\n📩 Downloading with DRM Keys\n\n🧚🏻‍♂️ Title: {name}"
+                                prog = await m.reply_text(Show)
+                                
+                                # Call your existing DRM download function
+                                res_file = await helper.decrypt_and_merge_video(mpd, keys_string, path, name, raw_text2)
+                                filename = res_file
+                                
+                                cc = f'**╭── ⋆⋅☆⋅⋆ ──╮**\n✦ **{str(count).zfill(3)}** ✦\n**╰── ⋆⋅☆⋅⋆ ──╯**\n\n🎭 **Title:** `{name1} 😎 .mkv`\n🖥️ **Resolution:** [{res}]\n\n📘 **Course:** `{b_name}`\n\n🚀 **Extracted By:** `{MR}`'
+                                
+                                await prog.delete(True)
+                                await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
+                                count += 1
+                                await asyncio.sleep(1)
+                                continue
+                                
+                            else:
+                                await m.reply_text("❌ Failed to extract DRM keys from API response")
+                                continue
+                        else:
+                            await m.reply_text(f"❌ Key extraction API failed with status: {response.status_code}")
+                            continue
+                            
+                    except Exception as e:
+                        await m.reply_text(f"❌ DRM key extraction and decryption failed: {str(e)}")
+                        continue
 
             # Determine yt-dlp format
             if "youtu" in url:
@@ -880,6 +943,11 @@ async def process_links_download(bot, m, links, count, b_name, res, MR, token, t
                 cc1 = f'**╭── ⋆⋅☆⋅⋆ ──╮**\n✦ **{str(count).zfill(3)}** ✦\n**╰── ⋆⋅☆⋅⋆ ──╯**\n\n🎭 **Title:** `{name1} 😎 .pdf`\n\n📘 **Course:** `{b_name}`\n\n🚀 **Extracted By:** `{MR}`'
                 cc2 = f'**╭── ⋆⋅☆⋅⋆ ──╮**\n✦ **{str(count).zfill(3)}** ✦\n**╰── ⋆⋅☆⋅⋆ ──╯**\n\n🎭 **Title:** `{name1} 😎 .jpg`\n\n📘 **Course:** `{b_name}`\n\n🚀 **Extracted By:** `{MR}`'
                 ccyt = f'**╭── ⋆⋅☆⋅⋆ ──╮**\n✦ **{str(count).zfill(3)}** ✦\n**╰── ⋆⋅☆⋅⋆ ──╯**\n\n🎭 **Title:** `{name1} 😎 .mkv`\n🎬 **Video Link:** {url}\n🖥️ **Resolution:** [{res}]\n\n📘 **Course:** `{b_name}`\n\n🚀 **Extracted By:** `{MR}`'
+
+                # Agar DRM download ho chuka hai to next link pe jao
+                if 'master.mpd' in links[i][1] and not enable_hls:
+                    # DRM download already completed in the elif block above
+                    continue
 
                 # Handle different content types
                 if "drive" in url:
@@ -1120,6 +1188,13 @@ async def account_login(bot: Client, m: Message):
     token = input11.text                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
     await input11.delete(True)
 
+    # NEW: Ask for HLS conversion preference
+    await editable.edit("**Enable HLS conversion for MPD? (yes/no)**\n\n- **yes**: Convert MPD to M3U8 (faster download)\n- **no**: Use DRM decryption (requires key)")
+    input_hls: Message = await bot.listen(editable.chat.id)
+    hls_preference = input_hls.text.lower()
+    await input_hls.delete(True)
+    enable_hls = hls_preference in ['yes', 'y', '1', 'true']
+
     await editable.edit("Enter Your Tumbnail Link or use `no` for default")                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
     input6 = message = await bot.listen(editable.chat.id)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
     raw_text6 = input6.text                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
@@ -1138,7 +1213,7 @@ async def account_login(bot: Client, m: Message):
     else:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
         count = int(raw_text)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 
-    # Start downloading using the same process_links_download function
-    await process_links_download(bot, m, links, count, b_name, res, MR, token, thumb, m.from_user.id, x)
+    # Start downloading using the same process_links_download function with HLS preference
+    await process_links_download(bot, m, links, count, b_name, res, MR, token, thumb, m.from_user.id, x, enable_hls)
 
 bot.run()
