@@ -801,13 +801,13 @@ async def process_links_download(bot, m, links, count, b_name, res, MR, token, t
                 keys_string = " ".join([f"--key {key}" for key in keys])
 
             elif "d1d34p8vz63oiq" in url or "sec1.pw.live" in url:
-             url = f"https://anonymouspwplayer-b99f57957198.herokuapp.com/pw?url={url}?token={token}"
+                url = f"https://anonymouspwplayer-b99f57957198.herokuapp.com/pw?url={url}?token={token}"
 
             elif "acecwply" in url:
                 cmd = f'yt-dlp -o "{name}.%(ext)s" -f "bestvideo[height<={raw_text2}]+bestaudio" --hls-prefer-ffmpeg --no-keep-video --remux-video mkv --no-warning "{url}"'
 
             elif "edge.api.brightcove.com" in url:
-                bcov = 'bcov_auth=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE3MjQyMzg3OTEsImNvbiI6eyJpc0FkbWluIjpmYWxzZSwiYXVzZXIiOiJVMFZ6TkdGU2NuQlZjR3h5TkZwV09FYzBURGxOZHowOSIsImlkIjoiZEUxbmNuZFBNblJqVEROVmFWTlFWbXhRTkhoS2R6MDkiLCJmaXJzdF9uYW1lIjoiYVcxV05ITjVSemR6Vm10ak1WUlBSRkF5ZVNzM1VUMDkiLCJlbWFpbCI6Ik5Ga3hNVWhxUXpRNFJ6VlhiR0ppWTJoUk0wMVdNR0pVTlU5clJXSkRWbXRMTTBSU2FHRnhURTFTUlQwPSIsInBob25lIjoiVUhVMFZrOWFTbmQ1ZVcwd1pqUTViRzVSYVc5aGR6MDkiLCJhdmF0YXIiOiJLM1ZzY1M4elMwcDBRbmxrYms4M1JEbHZla05pVVQwOSIsInJlZmVycmFsX2NvZGUiOiJOalZFYzBkM1IyNTBSM3B3VUZWbVRtbHFRVXAwVVQwOSIsImRldmljZV90eXBlIjoiYW5kcm9pZCIsImRldmljZV92ZXJzaW9uIjoiUShAbmRyb2lkIDEwLjApIiwiZGV2aWNlX21vZGVsIjoiU2Ftc3VuZyBTTS1TOTE4QiIsInJlbW90ZV9hZGRyIjoiNTQuMjI2LjI1NS4xNjMsIDU0LjIyNi4yNTUuMTYzIn19.snDdd-PbaoC42OUhn5SJaEGxq0VzfdzO49WTmYgTx8ra_Lz66GySZykpd2SxIZCnrKR6-R10F5sUSrKATv1CDk9ruj_ltCjEkcRq8mAqAytDcEBp72-W0Z7DtGi8LdnY7Vd9Kpaf499P-y3-godolS_7ixClcYOnWxe2nSVD5C9c5HkyisrHTvf6NFAuQC_FD3TzByldbPVKK0ag1UnHRavX8MtttjshnRhv5gJs5DQWj4Ir_dkMcJ4JaVZO3z8j0OxVLjnmuaRBujT-1pavsr1CCzjTbAcBvdjUfvzEhObWfA1-Vl5Y4bUgRHhl1U-0hne4-5fF0aouyu71Y6W0eg'
+                bcov = 'bcov_auth=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpYXQiOjE3MjQyMzg3OTEsImNvbiI6eyJpc0FkbWluIjpmYWxzZSwiYXVzZXIiOiJVMFZ6TkdGU2NuQlZjR3h5TkZwV09FYzBURGxOZHowOSIsImlkIjoiZEUxbmNuZFBNblJqVEROVmFWTlFWbXhRTkhoS2R6MDkiLCJmaXJzdF9uYW1lIjoiYVcxV05ITjVSemR6Vm10ak1WUlBSRkF5ZVNzM1VUMDkiLCJlbWFpbCI6Ik5Ga3hNVWhxUXpRNFJ6VlhiR0ppWTJoUk0wMVdNR0pVTlU5clJXSkRWbXRMTTBSU2FHRnhURTFTUlQwPSIsInBob25lIjoiVUhVMFZrOWFTbmQ1ZVcwd1pqUTViRzVSYVc5aGR6MDkiLCJhdmF0YXIiOiJLM1ZzY1M4elMwcDBRbmxrYms4M1JEbHZla05pVVQwOSIsInJlZmVycmFsX2NvZGUiOiJOalZFYzBkM1IyNTBSM3B3VUZWbVRtbHFRVXAwVVQwOSIsImRldmljZV90eXBlIjoiYW5kcm9pZCIsImRldmljZV92ZXJzaW9uIjoiUShBbmRyb2lkIDEwLjApIiwiZGV2aWNlX21vZGVsIjoiU2Ftc3VuZyBTTS1TOTE4QiIsInJlbW90ZV9hZGRyIjoiNTQuMjI2LjI1NS4xNjMsIDU0LjIyNi4yNTUuMTYzIn19.snDdd-PbaoC42OUhn5SJaEGxq0VzfdzO49WTmYgTx8ra_Lz66GySZykpd2SxIZCnrKR6-R10F5sUSrKATv1CDk9ruj_ltCjEkcRq8mAqAytDcEBp72-W0Z7DtGi8LdnY7Vd9Kpaf499P-y3-godolS_7ixClcYOnWxe2nSVD5C9c5HkyisrHTvf6NFAuQC_FD3TzByldbPVKK0ag1UnHRavX8MtttjshnRhv5gJs5DQWj4Ir_dkMcJ4JaVZO3z8j0OxVLjnmuaRBujT-1pavsr1CCzjTbAcBvdjUfvzEhObWfA1-Vl5Y4bUgRHhl1U-0hne4-5fF0aouyu71Y6W0eg'
                 url = url.split("bcov_auth")[0]+bcov 
 
             elif "classplusapp.com/drm/" in url:
@@ -839,11 +839,11 @@ async def process_links_download(bot, m, links, count, b_name, res, MR, token, t
                 url = url.split('*')[0]
 
             elif "allenplus" in url or "player.vimeo" in url :
-             if "controller/videoplay" in url :
-              url0 = "https://player.vimeo.com/video/" + url.split("videocode=")[1].split("&videohash=")[0]
-              url = f"https://master-api-v3.vercel.app/allenplus-vimeo?url={url0}&authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzkxOTMzNDE5NSIsInRnX3VzZXJuYW1lIjoi4p61IFtvZmZsaW5lXSIsImlhdCI6MTczODY5MjA3N30.SXzZ1MZcvMp5sGESj0hBKSghhxJ3k1GTWoBUbivUe1I"
-             else:  
-               url = f"https://master-api-v3.vercel.app/allenplus-vimeo?url={url}&authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzkxOTMzNDE5NSIsInRnX3VzZXJuYW1lIjoi4p61IFtvZmZsaW5lXSIsImlhdCI6MTczODY5MjA3N30.SXzZ1MZcvMp5sGESj0hBKSghhxJ3k1GTWoBUbivUe1I"
+                if "controller/videoplay" in url :
+                    url0 = "https://player.vimeo.com/video/" + url.split("videocode=")[1].split("&videohash=")[0]
+                    url = f"https://master-api-v3.vercel.app/allenplus-vimeo?url={url0}&authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzkxOTMzNDE5NSIsInRnX3VzZXJuYW1lIjoi4p61IFtvZmZsaW5lXSIsImlhdCI6MTczODY5MjA3N30.SXzZ1MZcvMp5sGESj0hBKSghhxJ3k1GTWoBUbivUe1I"
+                else:  
+                    url = f"https://master-api-v3.vercel.app/allenplus-vimeo?url={url}&authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzkxOTMzNDE5NSIsInRnX3VzZXJuYW1lIjoi4p61IFtvZmZsaW5lXSIsImlhdCI6MTczODY5MjA3N30.SXzZ1MZcvMp5sGESj0hBKSghhxJ3k1GTWoBUbivUe1I"
 
             elif url.startswith("https://videotest.adda247.com/"):
                 if url.split("/")[3] != "demo":
@@ -977,13 +977,13 @@ async def process_links_download(bot, m, links, count, b_name, res, MR, token, t
                         pass
 
                 elif 'pdf*' in url:
-                            pdf_key = url.split('*')[1]
-                            url = url.split('*')[0]
-                            pdf_enc = await helper.download_and_decrypt_pdf(url, name, pdf_key)
-                            copy = await bot.send_document(chat_id=m.chat.id, document=pdf_enc, caption=cc1)
-                            count += 1
-                            os.remove(pdf_enc)
-                            continue
+                    pdf_key = url.split('*')[1]
+                    url = url.split('*')[0]
+                    pdf_enc = await helper.download_and_decrypt_pdf(url, name, pdf_key)
+                    copy = await bot.send_document(chat_id=m.chat.id, document=pdf_enc, caption=cc1)
+                    count += 1
+                    os.remove(pdf_enc)
+                    continue
 
                 elif ".pdf" in url:
                     try:
@@ -1010,19 +1010,19 @@ async def process_links_download(bot, m, links, count, b_name, res, MR, token, t
                         continue
 
                 elif any(img in url.lower() for img in ['.jpeg', '.png', '.jpg']):
-                        try:
-                            subprocess.run(['wget', url, '-O', f'{name}.jpg'], check=True)
-                            await bot.send_photo(
-                                chat_id=m.chat.id,
-                                caption = cc2,
-                                photo= f'{name}.jpg',  )
-                        except subprocess.CalledProcessError:
-                            await m.reply_text("Failed to download the image. Please check the URL.")
-                        except Exception as e:
-                            await m.reply_text(f"An error occurred: {e}")
-                        finally:
-                            if os.path.exists(f'{name}.jpg'):
-                                os.remove(f'{name}.jpg')
+                    try:
+                        subprocess.run(['wget', url, '-O', f'{name}.jpg'], check=True)
+                        await bot.send_photo(
+                            chat_id=m.chat.id,
+                            caption = cc2,
+                            photo= f'{name}.jpg',  )
+                    except subprocess.CalledProcessError:
+                        await m.reply_text("Failed to download the image. Please check the URL.")
+                    except Exception as e:
+                        await m.reply_text(f"An error occurred: {e}")
+                    finally:
+                        if os.path.exists(f'{name}.jpg'):
+                            os.remove(f'{name}.jpg')
 
                 elif "youtu" in url:
                     try:
@@ -1034,29 +1034,29 @@ async def process_links_download(bot, m, links, count, b_name, res, MR, token, t
                         continue
 
                 elif ".ws" in url and  url.endswith(".ws"):
-                        try : 
-                            await helper.pdf_download(f"{api_url}utkash-ws?url={url}&authorization={api_token}",f"{name}.html")
-                            time.sleep(1)
-                            await bot.send_document(chat_id=m.chat.id, document=f"{name}.html", caption=cc1)
-                            os.remove(f'{name}.html')
-                            count += 1
-                            time.sleep(5)
-                        except FloodWait as e:
-                            await asyncio.sleep(e.x)
-                            await m.reply_text(str(e))
-                            continue
+                    try : 
+                        await helper.pdf_download(f"{api_url}utkash-ws?url={url}&authorization={api_token}",f"{name}.html")
+                        time.sleep(1)
+                        await bot.send_document(chat_id=m.chat.id, document=f"{name}.html", caption=cc1)
+                        os.remove(f'{name}.html')
+                        count += 1
+                        time.sleep(5)
+                    except FloodWait as e:
+                        await asyncio.sleep(e.x)
+                        await m.reply_text(str(e))
+                        continue
 
                 elif 'encrypted.m' in url:  
-                   Show = f"✈️ 𝐏𝐑𝐎𝐆𝐑𝐄𝐒𝐒 ✈️\n\n┠ 📈 Total Links = {len(links)}\n┠ 💥 Currently On = {str(count).zfill(3)}\n\n**📩 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐈𝐍𝐆 📩**\n\n**🧚🏻‍♂️ Title** : {name}\n├── **Extention** : {MR}\n├── **Resolution** : {raw_text2}\n├── **Url** : `Kya karega URL dekh ke  BSDK 👻👻`\n├── **Thumbnail** : `{input6.text}`\n├── **Bot Made By** : 🅱🅴🅰🆂🆃 👑" 
-                   prog = await m.reply_text(Show)  
-                   res_file = await helper.download_and_decrypt_video(url, cmd, name, appxkey)  
-                   filename = res_file  
+                    Show = f"✈️ 𝐏𝐑𝐎𝐆𝐑𝐄𝐒𝐒 ✈️\n\n┠ 📈 Total Links = {len(links)}\n┠ 💥 Currently On = {str(count).zfill(3)}\n\n**📩 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐈𝐍𝐆 📩**\n\n**🧚🏻‍♂️ Title** : {name}\n├── **Extention** : {MR}\n├── **Resolution** : {raw_text2}\n├── **Url** : `Kya karega URL dekh ke  BSDK 👻👻`\n├── **Thumbnail** : `{input6.text}`\n├── **Bot Made By** : 🅱🅴🅰🆂🆃 👑" 
+                    prog = await m.reply_text(Show)  
+                    res_file = await helper.download_and_decrypt_video(url, cmd, name, appxkey)  
+                    filename = res_file  
 
-                   await prog.delete(True)  
-                   await helper.send_vid(bot, m, cc, filename, thumb, name, prog)  
-                   count += 1  
-                   await asyncio.sleep(1)  
-                   continue  
+                    await prog.delete(True)  
+                    await helper.send_vid(bot, m, cc, filename, thumb, name, prog)  
+                    count += 1  
+                    await asyncio.sleep(1)  
+                    continue  
 
                 elif 'drmcdni' in url or 'drm/wv' in url:
                     Show = f"𝐏𝐑𝐎𝐆𝐑𝐄𝐒𝐒 ✈️\n\n┠ 📈 Total Links = {len(links)}\n┠ 💥 Currently On = {str(count).zfill(3)}\n\n**📩 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐈𝐍𝐆 📩**\n\n**🧚🏻‍♂️ Title** : {name}\n├── **Extention** : {MR}\n├── **Resolution** : {raw_text2}\n├── **Url** : `Kya karega URL dekh ke  BSDK 👻👻`\n├── **Thumbnail** : `{input6.text}`\n├── **Bot Made By** : 🅱🅴🅰🆂🆃 👑"
@@ -1213,7 +1213,7 @@ async def account_login(bot: Client, m: Message):
     else:                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
         count = int(raw_text)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 
-    # Start downloading using the same process_links_download function with HLS preference
-await process_links_download(bot, m, links, count, b_name, res, MR, token, thumb, m.from_user.id, x, enable_hls, raw_text2)
+    # Start downloading using the same process_links_download function with HLS preference and raw_text2
+    await process_links_download(bot, m, links, count, b_name, res, MR, token, thumb, m.from_user.id, x, enable_hls, raw_text2)
 
 bot.run()
