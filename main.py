@@ -849,83 +849,93 @@ async def process_links_download(bot, m, links, count, b_name, res, MR, token, t
                 if url.split("/")[3] != "demo":
                     url = f'https://videotest.adda247.com/demo/{url.split("https://videotest.adda247.com/")[1]}'
 
-            # NEW: Handle master.mpd URLs with HLS preference
-            elif 'master.mpd' in url:
-                if enable_hls:
-                    # Convert MPD to M3U8 (HLS ON)
-                    try:
-                        await m.reply_text("🔄 Converting MPD to M3U8...")
-                        m3u8_content, m3u8_url = helper.convert_mpd_to_m3u8(url, raw_text2)
-                        
-                        # Temporary m3u8 file create karo
-                        m3u8_filename = f"{name}_converted.m3u8"
-                        with open(m3u8_filename, 'w') as f:
-                            f.write(m3u8_content)
-                        
-                        # URL ko m3u8 file se replace karo
-                        url = m3u8_filename
-                        await m.reply_text("✅ MPD successfully converted to M3U8")
-                        
-                    except Exception as e:
-                        await m.reply_text(f"❌ MPD to M3U8 conversion failed: {str(e)}")
-                        continue
+elif 'master.mpd' in url:
+    if enable_hls:
+        # Convert MPD to M3U8 (HLS ON)
+        try:
+            await m.reply_text("🔄 Converting MPD to M3U8...")
+            
+            # Extract base URL and query parameters
+            parsed_url = urllib.parse.urlparse(url)
+            base_url = f"{parsed_url.scheme}://{parsed_url.netloc}{parsed_url.path}"
+            query_params = parsed_url.query
+            
+            # MPD to M3U8 conversion with query parameters
+            m3u8_content, m3u8_url = helper.convert_mpd_to_m3u8(url, raw_text2, query_params)
+            
+            # Temporary m3u8 file create karo
+            m3u8_filename = f"{name}_converted.m3u8"
+            with open(m3u8_filename, 'w') as f:
+                f.write(m3u8_content)
+            
+            # URL ko m3u8 file se replace karo
+            url = m3u8_filename
+            await m.reply_text("✅ MPD successfully converted to M3U8")
+            
+        except Exception as e:
+            await m.reply_text(f"❌ MPD to M3U8 conversion failed: {str(e)}")
+            continue
+    else:
+        # Use DRM decryption with KID:KEY extraction (HLS OFF)
+        try:
+            await m.reply_text("🔐 Extracting DRM keys for ClearKey decryption...")
+            
+            # Extract KID:KEY using the API
+            key_api_url = "https://studyable.io/studyrays/bot-development/key.php"
+            post_data = {"video_url": url}
+            
+            response = requests.post(
+                key_api_url, 
+                data=post_data, 
+                headers={"Content-Type": "application/x-www-form-urlencoded"}
+            )
+            
+            if response.status_code == 200:
+                key_data = response.json()
+                if key_data.get("success"):
+                    kid_key_pair = key_data["data"][0]  # Format: "KID:KEY"
+                    await m.reply_text(f"✅ DRM keys extracted: `{kid_key_pair}`")
+                    
+                    # Parse KID and KEY
+                    kid, key = kid_key_pair.split(":")
+                    
+                    # Use Classplus-style DRM download with extracted keys
+                    keys_string = f"--key {kid}:{key}"
+                    
+                    # Set up for DRM download with query parameters
+                    mpd = url
+                    path = f"./downloads/{m.chat.id}"
+                    
+                    # Extract query parameters for segment requests
+                    parsed_url = urllib.parse.urlparse(url)
+                    query_params = parsed_url.query
+                    
+                    # Use your existing DRM download function with query parameters
+                    Show = f"🔐 DRM Decryption Progress\n\n📈 Total Links: {len(links)}\n💥 Currently On: {str(count).zfill(3)}\n\n📩 Downloading with DRM Keys\n\n🧚🏻‍♂️ Title: {name}"
+                    prog = await m.reply_text(Show)
+                    
+                    # Call your existing DRM download function with query parameters
+                    res_file = await helper.decrypt_and_merge_video(mpd, keys_string, path, name, raw_text2, query_params)
+                    filename = res_file
+                    
+                    cc = f'**╭── ⋆⋅☆⋅⋆ ──╮**\n✦ **{str(count).zfill(3)}** ✦\n**╰── ⋆⋅☆⋅⋆ ──╯**\n\n🎭 **Title:** `{name1} 😎 .mkv`\n🖥️ **Resolution:** [{res}]\n\n📘 **Course:** `{b_name}`\n\n🚀 **Extracted By:** `{MR}`'
+                    
+                    await prog.delete(True)
+                    await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
+                    count += 1
+                    await asyncio.sleep(1)
+                    continue
+                    
                 else:
-                    # Use DRM decryption with KID:KEY extraction (HLS OFF)
-                    try:
-                        await m.reply_text("🔐 Extracting DRM keys for ClearKey decryption...")
-                        
-                        # Extract KID:KEY using the API
-                        key_api_url = "https://studyable.io/studyrays/bot-development/key.php"
-                        post_data = {"video_url": url}
-                        
-                        response = requests.post(
-                            key_api_url, 
-                            data=post_data, 
-                            headers={"Content-Type": "application/x-www-form-urlencoded"}
-                        )
-                        
-                        if response.status_code == 200:
-                            key_data = response.json()
-                            if key_data.get("success"):
-                                kid_key_pair = key_data["data"][0]  # Format: "KID:KEY"
-                                await m.reply_text(f"✅ DRM keys extracted: `{kid_key_pair}`")
-                                
-                                # Parse KID and KEY
-                                kid, key = kid_key_pair.split(":")
-                                
-                                # Use Classplus-style DRM download with extracted keys
-                                keys_string = f"--key {kid}:{key}"
-                                
-                                # Set up for DRM download
-                                mpd = url
-                                path = f"./downloads/{m.chat.id}"
-                                
-                                # Use your existing DRM download function
-                                Show = f"🔐 DRM Decryption Progress\n\n📈 Total Links: {len(links)}\n💥 Currently On: {str(count).zfill(3)}\n\n📩 Downloading with DRM Keys\n\n🧚🏻‍♂️ Title: {name}"
-                                prog = await m.reply_text(Show)
-                                
-                                # Call your existing DRM download function
-                                res_file = await helper.decrypt_and_merge_video(mpd, keys_string, path, name, raw_text2)
-                                filename = res_file
-                                
-                                cc = f'**╭── ⋆⋅☆⋅⋆ ──╮**\n✦ **{str(count).zfill(3)}** ✦\n**╰── ⋆⋅☆⋅⋆ ──╯**\n\n🎭 **Title:** `{name1} 😎 .mkv`\n🖥️ **Resolution:** [{res}]\n\n📘 **Course:** `{b_name}`\n\n🚀 **Extracted By:** `{MR}`'
-                                
-                                await prog.delete(True)
-                                await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
-                                count += 1
-                                await asyncio.sleep(1)
-                                continue
-                                
-                            else:
-                                await m.reply_text("❌ Failed to extract DRM keys from API response")
-                                continue
-                        else:
-                            await m.reply_text(f"❌ Key extraction API failed with status: {response.status_code}")
-                            continue
-                            
-                    except Exception as e:
-                        await m.reply_text(f"❌ DRM key extraction and decryption failed: {str(e)}")
-                        continue
+                    await m.reply_text("❌ Failed to extract DRM keys from API response")
+                    continue
+            else:
+                await m.reply_text(f"❌ Key extraction API failed with status: {response.status_code}")
+                continue
+                
+        except Exception as e:
+            await m.reply_text(f"❌ DRM key extraction and decryption failed: {str(e)}")
+            continue
 
             # Determine yt-dlp format
             if "youtu" in url:
@@ -1072,15 +1082,16 @@ async def process_links_download(bot, m, links, count, b_name, res, MR, token, t
                     await asyncio.sleep(1)
                     continue
 
-                else:
-                    Show = f"✈️ 𝐏𝐑𝐎𝐆𝐑𝐄𝐒𝐒 ✈️\n\n┠ 📈 Total Links = {len(links)}\n┠ 💥 Currently On = {str(count).zfill(3)}\n\n**📩 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐈𝐍𝐆 📩**\n\n**🧚🏻‍♂️ Title** : {name}\n├── **Extention** : {MR}\n├── **Resolution** : {raw_text2}\n├── **Url** : `Kya karega URL dekh ke  BSDK 👻👻`\n├── **Thumbnail** : `{input6.text}`\n├── **Bot Made By** : 🅱🅴🅰🆂🆃 👑"
-                    prog = await m.reply_text(Show)
-                    res_file = await helper.download_video(url, cmd, name)
-                    filename = res_file
-                    await prog.delete(True)
-                    await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
-                    count += 1
-                    time.sleep(1)
+                
+else:
+    Show = f"✈️ 𝐏𝐑𝐎𝐆𝐑𝐄𝐒𝐒 ✈️\n\n┠ 📈 Total Links = {len(links)}\n┠ 💥 Currently On = {str(count).zfill(3)}\n\n**📩 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐈𝐍𝐆 📩**\n\n**🧚🏻‍♂️ Title** : {name}\n├── **Extention** : {MR}\n├── **Resolution** : {raw_text2}\n├── **Url** : `Kya karega URL dekh ke  BSDK 👻👻`\n├── **Thumbnail** : `{raw_text6}`\n├── **Bot Made By** : 🅱🅴🅰🆂🆃 👑"
+    prog = await m.reply_text(Show)
+    res_file = await helper.download_video(url, cmd, name)
+    filename = res_file
+    await prog.delete(True)
+    await helper.send_vid(bot, m, cc, filename, thumb, name, prog)
+    count += 1
+    time.sleep(1)
 
             except Exception as e:
                 await m.reply_text(f"**downloading failed **\n\n{str(e)}\n\n**Name** - {name}\n**Link** - {url}")
