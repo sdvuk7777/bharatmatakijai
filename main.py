@@ -403,7 +403,7 @@ async def pw_direct_download(bot: Client, m: Message):
 
     except Exception as e:
         await m.reply_text(f"❌ **An error occurred:** `{str(e)}`")
-
+        
 @bot.on_callback_query(filters.regex(r"^pwdl_"))
 async def handle_pwdl_batch_selection(bot, callback_query):
     try:
@@ -750,16 +750,16 @@ async def start_download_process(bot, m, extracted_file, user_id):
 
         await m.reply_text("Enter Your Tumbnail Link or use `no` for default")
         input6: Message = await bot.listen(m.chat.id)
-thumb_input = input6.text.strip()
-await input6.delete(True)
+        thumb_input = input6.text.strip()
+        await input6.delete(True)
 
-if thumb_input.lower() == "no":
-    thumb = "no"
-elif thumb_input.startswith("http://") or thumb_input.startswith("https://"):
-    getstatusoutput(f"wget '{thumb_input}' -O 'thumb.jpg'")
-    thumb = "thumb.jpg"
-else:
-    thumb = "no"
+        if thumb_input.lower() == "no":
+            thumb = "no"
+        elif thumb_input.startswith("http://") or thumb_input.startswith("https://"):
+            getstatusoutput(f"wget '{thumb_input}' -O 'thumb.jpg'")
+            thumb = "thumb.jpg"
+        else:
+            thumb = "no"
 
         if len(links) == 1:
             count = 1
