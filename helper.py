@@ -41,15 +41,15 @@ def convert_mpd_to_m3u8(mpd_url, quality="720"):
         path_parts = parsed_url.path.split("/")
         video_id = path_parts[1] if len(path_parts) > 1 else "video"
         query_string = parsed_url.query
-        
+
         # Construct m3u8 URL
         m3u8_url = f"{base_url}/{video_id}/hls/{quality}/main.m3u8?{query_string}"
-        
+
         # Download m3u8 content
         response = requests.get(m3u8_url)
         if response.status_code != 200:
             raise Exception(f"Failed to download m3u8 file: {response.status_code}")
-        
+
         content = response.text
 
         # Replace EXT-X-KEY URI
@@ -62,9 +62,9 @@ def convert_mpd_to_m3u8(mpd_url, quality="720"):
             return f"{base_url}/{video_id}/hls/{quality}/{ts_file}?{query_string}"
 
         content = re.sub(r'(\d+\.ts)', replace_ts, content)
-        
+
         return content, m3u8_url
-        
+
     except Exception as e:
         raise Exception(f"MPD to M3U8 conversion failed: {str(e)}")
 
@@ -213,7 +213,18 @@ async def decrypt_and_merge_video(mpd_url, keys_string, output_path, output_name
         output_path = Path(output_path)
         output_path.mkdir(parents=True, exist_ok=True)
 
-        cmd1 = f'yt-dlp -f "bv[height<={quality}]+ba/b" -o "{output_path}/file.%(ext)s" --allow-unplayable-format --no-check-certificate --external-downloader aria2c "{mpd_url}"'
+        # Parse URL aur query extract karo
+        parsed_url = urlparse(mpd_url)
+        query_string = f"?{parsed_url.query}" if parsed_url.query else ""
+
+        # yt-dlp command build karo
+        cmd1 = (
+            f'yt-dlp -f "bv[height<={quality}]+ba/b" '
+            f'-o "{output_path}/file.%(ext)s" '
+            f'--allow-unplayable-format --no-check-certificate '
+            f'--external-downloader aria2c "{mpd_url}{query_string}"'
+        )
+
         print(f"Running command: {cmd1}")
         os.system(cmd1)
 
