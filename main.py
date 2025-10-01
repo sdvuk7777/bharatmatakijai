@@ -767,12 +767,12 @@ async def start_download_process(bot, m, extracted_file, user_id):
             count = int(raw_text)
 
         # Start downloading links with HLS preference and raw_text2
-        await process_links_download(bot, m, links, count, b_name, res, MR, token, thumb, user_id, extracted_file, enable_hls, raw_text2)
+        await process_links_download(bot, m, links, count, b_name, res, MR, token, thumb, user_id, extracted_file, enable_hls, raw_text2, thumb_input)
         
     except Exception as e:
         await m.reply_text(f"❌ Error starting download process: {str(e)}")
 
-async def process_links_download(bot, m, links, count, b_name, res, MR, token, thumb, user_id, extracted_file, enable_hls=True, raw_text2=None):
+async def process_links_download(bot, m, links, count, b_name, res, MR, token, thumb, user_id, extracted_file, enable_hls=True, raw_text2=None, thumb_input=None):
     """Process the links for download with HLS preference"""
     try:
         for i in range(count - 1, len(links)):
@@ -990,7 +990,7 @@ async def process_links_download(bot, m, links, count, b_name, res, MR, token, t
                     try:
                         if "cwmediabkt99" in url:
                             time.sleep(2)
-                            cmd = f'yt-dlp -o "{name}.pdf" "https://master-api-v3.vercel.app/cw-pdf?url={url}&authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiNzkxOTMzNDE5NSIsInRnX3VzZXJuYW1lIjoi4p61IFtvZmZsaW5lXSIsImlhdCI6MTczODY5MjA3N30.SXzZ1MZcvMp5sGESj0hBKSghhxJ3k1GTWoBUbivUe1I"'
+                            cmd = f'yt-dlp -o "{name}.pdf" "https://master-api-v3.vercel.app/cw-pdf?url={url}&authorization=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIojoiNzkxOTMzNDE5NSIsInRnX3VzZXJuYW1lIjoi4p61IFtvZmZsaW5lXSIsImlhdCI6MTczODY5MjA3N30.SXzZ1MZcvMp5sGESj0hBKSghhxJ3k1GTWoBUbivUe1I"'
                             download_cmd = f"{cmd} -R 25 --fragment-retries 25"
                             os.system(download_cmd)
                             copy = await bot.send_document(chat_id=m.chat.id, document=f'{name}.pdf', caption=cc1)
@@ -1048,7 +1048,7 @@ async def process_links_download(bot, m, links, count, b_name, res, MR, token, t
                         continue
 
                 elif 'encrypted.m' in url:  
-                    Show = f"✈️ 𝐏𝐑𝐎𝐆𝐑𝐄𝐒𝐒 ✈️\n\n┠ 📈 Total Links = {len(links)}\n┠ 💥 Currently On = {str(count).zfill(3)}\n\n**📩 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐈𝐍𝐆 📩**\n\n**🧚🏻‍♂️ Title** : {name}\n├── **Extention** : {MR}\n├── **Resolution** : {raw_text2}\n├── **Url** : `Kya karega URL dekh ke  BSDK 👻👻`\n├── **Thumbnail** : `{input6.text}`\n├── **Bot Made By** : 🅱🅴🅰🆂🆃 👑" 
+                    Show = f"✈️ 𝐏𝐑𝐎𝐆𝐑𝐄𝐒𝐒 ✈️\n\n┠ 📈 Total Links = {len(links)}\n┠ 💥 Currently On = {str(count).zfill(3)}\n\n**📩 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐈𝐍𝐆 📩**\n\n**🧚🏻‍♂️ Title** : {name}\n├── **Extention** : {MR}\n├── **Resolution** : {raw_text2}\n├── **Url** : `Kya karega URL dekh ke  BSDK 👻👻`\n├── **Thumbnail** : `{thumb_input}`\n├── **Bot Made By** : 🅱🅴🅰🆂🆃 👑" 
                     prog = await m.reply_text(Show)  
                     res_file = await helper.download_and_decrypt_video(url, cmd, name, appxkey)  
                     filename = res_file  
@@ -1060,7 +1060,7 @@ async def process_links_download(bot, m, links, count, b_name, res, MR, token, t
                     continue  
 
                 elif 'drmcdni' in url or 'drm/wv' in url:
-                    Show = f"𝐏𝐑𝐎𝐆𝐑𝐄𝐒𝐒 ✈️\n\n┠ 📈 Total Links = {len(links)}\n┠ 💥 Currently On = {str(count).zfill(3)}\n\n**📩 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐈𝐍𝐆 📩**\n\n**🧚🏻‍♂️ Title** : {name}\n├── **Extention** : {MR}\n├── **Resolution** : {raw_text2}\n├── **Url** : `Kya karega URL dekh ke  BSDK 👻👻`\n├── **Thumbnail** : `{input6.text}`\n├── **Bot Made By** : 🅱🅴🅰🆂🆃 👑"
+                    Show = f"𝐏𝐑𝐎𝐆𝐑𝐄𝐒𝐒 ✈️\n\n┠ 📈 Total Links = {len(links)}\n┠ 💥 Currently On = {str(count).zfill(3)}\n\n**📩 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐈𝐍𝐆 📩**\n\n**🧚🏻‍♂️ Title** : {name}\n├── **Extention** : {MR}\n├── **Resolution** : {raw_text2}\n├── **Url** : `Kya karega URL dekh ke  BSDK 👻👻`\n├── **Thumbnail** : `{thumb_input}`\n├── **Bot Made By** : 🅱🅴🅰🆂🆃 👑"
                     prog = await m.reply_text(Show)
 
                     # Use the decrypt_and_merge_video function
@@ -1074,7 +1074,7 @@ async def process_links_download(bot, m, links, count, b_name, res, MR, token, t
                     continue
 
                 else:
-                    Show = f"✈️ 𝐏𝐑𝐎𝐆𝐑𝐄𝐒𝐒 ✈️\n\n┠ 📈 Total Links = {len(links)}\n┠ 💥 Currently On = {str(count).zfill(3)}\n\n**📩 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐈𝐍𝐆 📩**\n\n**🧚🏻‍♂️ Title** : {name}\n├── **Extention** : {MR}\n├── **Resolution** : {raw_text2}\n├── **Url** : `Kya karega URL dekh ke  BSDK 👻👻`\n├── **Thumbnail** : `{input6.text}`\n├── **Bot Made By** : 🅱🅴🅰🆂🆃 👑"
+                    Show = f"✈️ 𝐏𝐑𝐎𝐆𝐑𝐄𝐒𝐒 ✈️\n\n┠ 📈 Total Links = {len(links)}\n┠ 💥 Currently On = {str(count).zfill(3)}\n\n**📩 𝐃𝐎𝐖𝐍𝐋𝐎𝐀𝐃𝐈𝐍𝐆 📩**\n\n**🧚🏻‍♂️ Title** : {name}\n├── **Extention** : {MR}\n├── **Resolution** : {raw_text2}\n├── **Url** : `Kya karega URL dekh ke  BSDK 👻👻`\n├── **Thumbnail** : `{thumb_input}`\n├── **Bot Made By** : 🅱🅴🅰🆂🆃 👑"
                     prog = await m.reply_text(Show)
                     res_file = await helper.download_video(url, cmd, name)
                     filename = res_file
@@ -1215,6 +1215,6 @@ async def account_login(bot: Client, m: Message):
         count = int(raw_text)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 
     # Start downloading using the same process_links_download function with HLS preference and raw_text2
-    await process_links_download(bot, m, links, count, b_name, res, MR, token, thumb, m.from_user.id, x, enable_hls, raw_text2)
+    await process_links_download(bot, m, links, count, b_name, res, MR, token, thumb, m.from_user.id, x, enable_hls, raw_text2, raw_text6)
 
 bot.run()
