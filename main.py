@@ -852,24 +852,24 @@ async def process_links_download(bot, m, links, count, b_name, res, MR, token, t
 
             # NEW: Handle master.mpd URLs with HLS preference
             elif 'master.mpd' in url:
-                if enable_hls:
-                    # Convert MPD to M3U8 (HLS ON)
-                    try:
-                        await m.reply_text("🔄 Converting MPD to M3U8...")
-                        m3u8_content, m3u8_url = helper.convert_mpd_to_m3u8(url, raw_text2)
-                        
-                        # Temporary m3u8 file create karo
-                        m3u8_filename = f"{name}_converted.m3u8"
-                        with open(m3u8_filename, 'w') as f:
-                            f.write(m3u8_content)
-                        
-                        # URL ko m3u8 file se replace karo
-                        url = m3u8_filename
-                        await m.reply_text("✅ MPD successfully converted to M3U8")
-                        
-                    except Exception as e:
-                        await m.reply_text(f"❌ MPD to M3U8 conversion failed: {str(e)}")
-                        continue
+    if enable_hls:
+        try:
+            await m.reply_text("🔄 Converting MPD to M3U8...")
+            # raw_text2 ko sirf height (jaise 720) ke liye use karo
+            quality = raw_text2 if raw_text2.isdigit() else "720"
+            m3u8_content, m3u8_url = helper.convert_mpd_to_m3u8(url, quality)
+
+            m3u8_filename = f"{name}_converted.m3u8"
+            with open(m3u8_filename, 'w') as f:
+                f.write(m3u8_content)
+
+            # yt-dlp ke liye local file ko HTTP jaisa dikhana
+            url = f"file://{os.path.abspath(m3u8_filename)}"
+
+            await m.reply_text("✅ MPD successfully converted to M3U8")
+        except Exception as e:
+            await m.reply_text(f"❌ MPD to M3U8 conversion failed: {str(e)}")
+            continue
                 else:
                     # Use DRM decryption with KID:KEY extraction (HLS OFF)
                     try:
